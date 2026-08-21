@@ -7,23 +7,69 @@ import type { CallType } from "@/lib/types";
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
 
+/** Timeout deadline for the scoring call, from env (default 55s). Kept below
+ *  Vercel's maxDuration so scoring fails gracefully before the function is killed. */
+function llmTimeoutMs(): number {
+  const raw = Number(process.env.LLM_TIMEOUT_MS);
+  return Number.isFinite(raw) && raw > 0 ? raw : 55000;
+}
+
+/** Races a promise against a deadline. Rejects with a timeout error if the
+ *  promise doesn't settle in time. The underlying work is not aborted, but the
+ *  rejection lets the caller record a failure instead of hanging. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`Scoring timed out after ${ms}ms`)),
+      ms
+    );
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
 /** Runs the LLM scoring and writes the outcome back to the row.
  *  Invoked via `after()` (below) so the HTTP response returns immediately and
- *  Vercel keeps the serverless function alive until scoring finishes. */
+ *  Vercel keeps the serverless function alive until scoring finishes.
+ *
+ *  The ENTIRE body is wrapped in one outer try/catch so no path can leave the
+ *  row stuck on "processing": any failure (scoring error, timeout, or even the
+ *  "completed" update) lands in the catch, which writes status "failed". The
+ *  failure-write itself is guarded so a DB error is logged, never thrown. */
 async function runScoring(id: string, callType: CallType, transcript: string) {
-  const admin = getSupabaseAdmin();
   try {
-    const result = await scoreTranscript(callType, transcript);
+    const admin = getSupabaseAdmin();
+    const result = await withTimeout(
+      scoreTranscript(callType, transcript),
+      llmTimeoutMs()
+    );
     await admin
       .from("evaluations")
       .update({ status: "completed", result, error: null })
       .eq("id", id);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await admin
-      .from("evaluations")
-      .update({ status: "failed", error: message })
-      .eq("id", id);
+    console.error(`[evaluate] scoring failed for ${id}:`, message);
+    try {
+      const admin = getSupabaseAdmin();
+      await admin
+        .from("evaluations")
+        .update({ status: "failed", error: message })
+        .eq("id", id);
+    } catch (dbErr) {
+      console.error(
+        `[evaluate] could not write failure status for ${id}:`,
+        dbErr
+      );
+    }
   }
 }
 

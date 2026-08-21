@@ -31,7 +31,7 @@ export default function Home() {
   const router = useRouter();
   const [callType, setCallType] = useState<CallType | null>(null);
   const [transcript, setTranscript] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recent, setRecent] = useState<RecentEval[]>([]);
 
@@ -49,11 +49,12 @@ export default function Home() {
   }, []);
 
   const canSubmit =
-    callType !== null && transcript.trim().length >= 20 && !submitting;
+    callType !== null && transcript.trim().length >= 20 && !isSubmitting;
 
   async function onSubmit() {
-    if (!canSubmit || !callType) return;
-    setSubmitting(true);
+    // Double-click prevention: gate on isSubmitting so a second click is ignored.
+    if (isSubmitting || !canSubmit || !callType) return;
+    setIsSubmitting(true);
     setError(null);
     try {
       const res = await fetch("/api/evaluate", {
@@ -66,7 +67,10 @@ export default function Home() {
       router.push(`/run/${data.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
-      setSubmitting(false);
+    } finally {
+      // Re-enable after 2s so a stuck/failed request can be retried, while a
+      // rapid second click during submission stays blocked.
+      setTimeout(() => setIsSubmitting(false), 2000);
     }
   }
 
@@ -119,7 +123,7 @@ export default function Home() {
           disabled={!canSubmit}
           className="btn-primary ml-auto px-8 py-3.5 text-[17px] font-semibold"
         >
-          {submitting ? "Starting..." : "Run evaluation"}
+          {isSubmitting ? "Running..." : "Run evaluation"}
         </button>
       </div>
 
