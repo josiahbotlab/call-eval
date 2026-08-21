@@ -34,42 +34,45 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
+    <main className="mx-auto max-w-2xl px-6 py-14">
       <p className="label">QC Evaluator</p>
       <h1
-        className="mt-3 text-3xl font-semibold tracking-tight"
-        style={{ color: "var(--fg)" }}
+        className="mt-2 text-xl font-semibold tracking-tight"
+        style={{ color: "var(--ink)" }}
       >
         Run an evaluation
       </h1>
-      <p className="mt-2" style={{ color: "var(--fg-2)" }}>
+      <p className="mt-1.5 text-[13px]" style={{ color: "var(--ink-2)" }}>
         Paste a call transcript, pick the call type, and score it against the
         12-dimension rubric.
       </p>
 
       {/* Call type */}
-      <div className="mt-8 grid grid-cols-1 gap-px sm:grid-cols-2">
-        <CardButton
-          title="Kick-off call"
-          desc="First call. Onboarding, goals, program, next steps."
-          selected={callType === "kickoff"}
-          onClick={() => setCallType("kickoff")}
-        />
-        <CardButton
-          title="Coaching call"
-          desc="Ongoing session. Check-in, coaching, accountability."
-          selected={callType === "coaching"}
-          onClick={() => setCallType("coaching")}
-        />
+      <div className="mt-7">
+        <p className="label mb-2">Call type</p>
+        <div className="flex flex-col gap-px sm:flex-row sm:gap-2">
+          <CardButton
+            title="Kick-off call"
+            desc="First call. Onboarding, goals, program, next steps."
+            selected={callType === "kickoff"}
+            onClick={() => setCallType("kickoff")}
+          />
+          <CardButton
+            title="Coaching call"
+            desc="Ongoing session. Check-in, coaching, accountability."
+            selected={callType === "coaching"}
+            onClick={() => setCallType("coaching")}
+          />
+        </div>
       </div>
 
       {/* Transcript */}
-      <div className="mt-8">
-        <div className="mb-2 flex items-baseline justify-between">
+      <div className="mt-7">
+        <div className="mb-1.5 flex items-baseline justify-between">
           <label htmlFor="transcript" className="label">
             Transcript
           </label>
-          <span className="mono text-[11px]" style={{ color: "var(--fg-3)" }}>
+          <span className="mono text-[11px]" style={{ color: "var(--ink-3)" }}>
             {transcript.length.toLocaleString()} chars
           </span>
         </div>
@@ -77,48 +80,54 @@ export default function Home() {
           id="transcript"
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
-          placeholder="Paste the full call transcript here…"
+          placeholder="Paste the full call transcript here..."
           spellCheck={false}
-          className="mono h-72 w-full resize-y p-4 text-sm leading-relaxed outline-none transition-colors focus:border-[var(--border-strong)]"
+          className="mono h-72 w-full resize-y p-3 text-xs leading-relaxed outline-none focus:border-[var(--border-strong)]"
           style={{
-            background: "var(--panel)",
+            background: "var(--field)",
             border: "1px solid var(--border)",
-            color: "var(--fg)",
+            borderRadius: "var(--radius)",
+            color: "var(--ink)",
           }}
         />
       </div>
 
       {error && (
         <p
-          className="mt-4 pl-3 text-sm leading-relaxed"
+          className="mt-3 pl-2.5 text-[13px] leading-relaxed"
           style={{
-            color: "var(--fg-2)",
-            borderLeft: "1px solid var(--band-fail)",
+            color: "var(--ink-2)",
+            borderLeft: "1px solid var(--accent)",
           }}
         >
           {error}
         </p>
       )}
 
-      <div className="mt-6 flex items-center gap-4">
+      <div className="mt-5 flex items-center gap-3">
         <button
           onClick={onSubmit}
           disabled={!canSubmit}
-          className="px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed"
+          className="px-4 py-2 text-[13px] font-semibold disabled:cursor-not-allowed"
           style={
             canSubmit
-              ? { background: "var(--accent)", color: "#0a0a0a" }
+              ? {
+                  background: "var(--accent)",
+                  color: "var(--paper)",
+                  borderRadius: "var(--radius)",
+                }
               : {
                   background: "transparent",
-                  color: "var(--fg-3)",
+                  color: "var(--ink-3)",
                   border: "1px solid var(--border)",
+                  borderRadius: "var(--radius)",
                 }
           }
         >
-          {submitting ? "Starting…" : "Run evaluation"}
+          {submitting ? "Starting..." : "Run evaluation"}
         </button>
         {callType === null && (
-          <span className="text-sm" style={{ color: "var(--fg-3)" }}>
+          <span className="text-xs" style={{ color: "var(--ink-3)" }}>
             Pick a call type first.
           </span>
         )}
@@ -142,21 +151,20 @@ function CardButton({
     <button
       type="button"
       onClick={onClick}
-      className="p-5 text-left transition-colors"
+      className="flex-1 p-3 text-left"
       style={{
-        background: selected ? "var(--panel)" : "transparent",
-        border: `1px solid ${
-          selected ? "var(--accent)" : "var(--border)"
-        }`,
+        background: selected ? "var(--field)" : "transparent",
+        border: `1px solid ${selected ? "var(--accent)" : "var(--border)"}`,
+        borderRadius: "var(--radius)",
       }}
     >
       <div
-        className="text-base font-medium"
-        style={{ color: selected ? "var(--accent)" : "var(--fg)" }}
+        className="text-[13px] font-semibold"
+        style={{ color: selected ? "var(--accent)" : "var(--ink)" }}
       >
         {title}
       </div>
-      <div className="mt-1 text-sm" style={{ color: "var(--fg-3)" }}>
+      <div className="mt-0.5 text-xs" style={{ color: "var(--ink-3)" }}>
         {desc}
       </div>
     </button>

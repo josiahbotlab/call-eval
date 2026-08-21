@@ -31,7 +31,7 @@ export default function RunPage({
         setRow(data);
         if (data.status === "completed" || data.status === "failed") return;
       } catch {
-        // transient error — keep polling
+        // transient error - keep polling
       }
       if (!stopped.current) timer = setTimeout(poll, 2000);
     }
@@ -46,13 +46,13 @@ export default function RunPage({
   if (notFound) {
     return (
       <Centered>
-        <p style={{ color: "var(--fg-2)" }}>Evaluation not found.</p>
+        <p style={{ color: "var(--ink-2)" }}>Evaluation not found.</p>
         <Link
           href="/"
-          className="mono mt-3 text-xs transition-colors hover:text-[var(--fg)]"
-          style={{ color: "var(--fg-3)" }}
+          className="mt-3 text-xs hover:text-[var(--ink)]"
+          style={{ color: "var(--ink-3)" }}
         >
-          ← Back
+          &lt; Back
         </Link>
       </Centered>
     );
@@ -60,22 +60,22 @@ export default function RunPage({
 
   if (row?.status === "failed") {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
+      <main className="mx-auto max-w-2xl px-6 py-14">
         <Link
           href="/"
-          className="mono text-xs transition-colors hover:text-[var(--fg)]"
-          style={{ color: "var(--fg-3)" }}
+          className="text-xs hover:text-[var(--ink)]"
+          style={{ color: "var(--ink-3)" }}
         >
-          ← Back
+          &lt; Back
         </Link>
-        <p className="label mt-6" style={{ color: "var(--band-fail)" }}>
+        <p className="label mt-5" style={{ color: "var(--accent)" }}>
           Evaluation failed
         </p>
         <p
-          className="mt-3 pl-3 text-sm leading-relaxed"
+          className="mt-2 pl-2.5 text-[13px] leading-relaxed"
           style={{
-            color: "var(--fg-2)",
-            borderLeft: "1px solid var(--band-fail)",
+            color: "var(--ink-2)",
+            borderLeft: "1px solid var(--accent)",
           }}
         >
           {row.error || "The scoring run failed without an error message."}
@@ -88,16 +88,16 @@ export default function RunPage({
     return <Report result={row.result} createdAt={row.created_at} />;
   }
 
-  // pending / processing / initial load — just the word, subtly pulsing.
+  // pending / processing / initial load - plain text, no spinner, no animation.
   return (
     <Centered>
       <p
-        className="pulse text-2xl font-semibold tracking-tight"
-        style={{ color: "var(--fg)" }}
+        className="text-base font-semibold tracking-tight"
+        style={{ color: "var(--ink)" }}
       >
-        Scoring…
+        Scoring...
       </p>
-      <p className="mono mt-3 text-xs" style={{ color: "var(--fg-3)" }}>
+      <p className="mt-2 text-xs" style={{ color: "var(--ink-3)" }}>
         You can close this tab and come back.
       </p>
     </Centered>

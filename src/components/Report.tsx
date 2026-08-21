@@ -30,72 +30,78 @@ export default function Report({
   const appliedCaps = (result.global_caps ?? []).filter((c) => c.applied);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-6 py-10">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link
             href="/"
-            className="mono text-xs transition-colors hover:text-[var(--fg)]"
-            style={{ color: "var(--fg-3)" }}
+            className="text-xs hover:text-[var(--ink)]"
+            style={{ color: "var(--ink-3)" }}
           >
-            ← Back
+            &lt; Back
           </Link>
-          <p className="label mt-3">Full Analysis · {callLabel}</p>
+          <p className="label mt-2.5">Full Analysis / {callLabel}</p>
         </div>
-        <div className="flex flex-col items-end gap-1.5">
+        <div className="flex flex-col items-end gap-1">
           <button
             onClick={() => downloadPdf(result)}
-            className="px-3 py-1.5 text-xs font-medium transition-colors hover:text-[var(--fg)] hover:border-[var(--border-strong)]"
+            className="px-2.5 py-1 text-xs font-medium hover:text-[var(--ink)] hover:border-[var(--border-strong)]"
             style={{
-              color: "var(--fg-2)",
+              color: "var(--ink-2)",
               border: "1px solid var(--border)",
+              borderRadius: "var(--radius)",
             }}
           >
             Download PDF
           </button>
-          <span className="mono text-[11px]" style={{ color: "var(--fg-3)" }}>
+          <span className="text-[11px]" style={{ color: "var(--ink-3)" }}>
             evaluated {timeAgo(createdAt)}
           </span>
         </div>
       </div>
 
+      <div
+        className="mt-5"
+        style={{ borderTop: "1px solid var(--border-strong)" }}
+      />
+
       {/* Overview: one-thing / brief + score */}
-      <div className="mt-10 grid grid-cols-1 items-start gap-10 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 items-start gap-8 md:grid-cols-3">
         <div className="md:col-span-2">
           <p className="label">The one thing</p>
           <p
-            className="mt-2 text-2xl font-semibold leading-snug"
-            style={{ color: "var(--fg)" }}
+            className="mt-1.5 text-lg font-semibold leading-snug"
+            style={{ color: "var(--ink)" }}
           >
             {result.the_one_thing}
           </p>
           {typeof result.projected_score_with_fix === "number" && (
-            <p className="mono mt-2 text-xs" style={{ color: "var(--fg-3)" }}>
+            <p className="mt-1 text-xs" style={{ color: "var(--ink-3)" }}>
               Projected {result.projected_score_with_fix} / {result.max_possible}{" "}
               with this fix
             </p>
           )}
           <p
-            className="mt-5 leading-relaxed"
-            style={{ color: "var(--fg-2)" }}
+            className="mt-3 text-[13px] leading-relaxed"
+            style={{ color: "var(--ink-2)" }}
           >
             {result.brief}
           </p>
 
           {result.red_flags?.length > 0 && (
-            <div className="mt-7">
-              <p className="label" style={{ color: "var(--band-fail)" }}>
+            <div className="mt-5">
+              <p className="label" style={{ color: "var(--accent)" }}>
                 Red flags
               </p>
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-2 space-y-1.5">
                 {result.red_flags.map((rf, i) => (
                   <p
                     key={i}
-                    className="pl-3 text-sm leading-relaxed"
+                    className="pl-2.5 text-[13px] leading-relaxed"
                     style={{
-                      color: "var(--fg-2)",
-                      borderLeft: "1px solid var(--band-fail)",
+                      color: "var(--ink-2)",
+                      borderLeft: "1px solid var(--accent)",
                     }}
                   >
                     {rf}
@@ -106,21 +112,21 @@ export default function Report({
           )}
 
           {appliedCaps.length > 0 && (
-            <div className="mt-6">
+            <div className="mt-4">
               <p className="label" style={{ color: "var(--accent)" }}>
                 Caps applied
               </p>
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-2 space-y-1.5">
                 {appliedCaps.map((c, i) => (
                   <p
                     key={i}
-                    className="pl-3 text-sm leading-relaxed"
+                    className="pl-2.5 text-[13px] leading-relaxed"
                     style={{
-                      color: "var(--fg-2)",
+                      color: "var(--ink-2)",
                       borderLeft: "1px solid var(--accent-dim)",
                     }}
                   >
-                    {c.condition} — {c.cap_description}
+                    {c.condition} - {c.cap_description}
                   </p>
                 ))}
               </div>
@@ -128,7 +134,7 @@ export default function Report({
           )}
         </div>
 
-        <div className="md:justify-self-end md:pt-1">
+        <div className="md:justify-self-end">
           <ScoreGauge
             score={result.total_score}
             max={result.max_possible}
@@ -138,8 +144,8 @@ export default function Report({
       </div>
 
       {/* Dimensions */}
-      <div className="mt-12">
-        <p className="label mb-1">12 dimensions</p>
+      <div className="mt-9">
+        <p className="label mb-0.5">12 dimensions</p>
         <div style={{ borderBottom: "1px solid var(--border)" }}>
           {result.dimensions
             .slice()

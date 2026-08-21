@@ -1,7 +1,7 @@
 import { bandStyle } from "@/lib/bands";
 
-// A large monospaced number over a thin horizontal progress bar in the band
-// color — no semicircle, no dial. Reads like a terminal readout.
+// A score readout as it would sit on a printed evaluation form: a plain ink
+// number over max, a hairline clay progress rule, and the band label.
 export default function ScoreGauge({
   score,
   max,
@@ -15,33 +15,32 @@ export default function ScoreGauge({
   const bs = bandStyle(band);
 
   return (
-    <div className="w-full min-w-[180px]">
+    <div className="w-full min-w-[150px]">
       <div className="label">Score</div>
-      <div className="mono mt-2 flex items-baseline gap-1.5">
+      <div className="mono mt-1 flex items-baseline gap-1.5">
         <span
-          className="text-6xl font-semibold leading-none"
-          style={{ color: bs.color }}
+          className="text-5xl font-semibold leading-none"
+          style={{ color: "var(--ink)" }}
         >
           {score}
         </span>
-        <span className="text-lg" style={{ color: "var(--fg-3)" }}>
+        <span className="text-base" style={{ color: "var(--ink-3)" }}>
           / {max}
         </span>
       </div>
 
-      {/* thin progress bar */}
       <div
-        className="mt-3 h-[3px] w-full"
+        className="mt-2 h-[2px] w-full"
         style={{ background: "var(--border-strong)" }}
       >
         <div
           className="h-full"
-          style={{ width: `${(frac * 100).toFixed(1)}%`, background: bs.color }}
+          style={{ width: `${(frac * 100).toFixed(1)}%`, background: "var(--accent)" }}
         />
       </div>
 
       <div
-        className="mono mt-2 text-xs font-semibold tracking-[0.12em]"
+        className="mt-1.5 text-xs font-semibold tracking-[0.08em]"
         style={{ color: bs.color }}
       >
         {bs.label}

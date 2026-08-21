@@ -2,17 +2,18 @@ import type { OverallBand } from "./types";
 
 export interface BandStyle {
   label: string;
-  color: string; // hex for dark-mode UI (score number, underline, band label)
+  color: string; // hex for UI: ink when fine, clay accent when it needs attention
   pdf: [number, number, number]; // rgb for jsPDF (light-background report)
 }
 
-// UI colors are muted, dark-mode-tuned; PDF colors stay saturated for print.
+// UI stays monochrome + one accent: good bands read in ink, weaker bands are
+// flagged in clay. PDF colors are left saturated for the printed report.
 const STYLES: Record<OverallBand, BandStyle> = {
-  ELITE: { label: "ELITE", color: "#79b083", pdf: [22, 163, 74] },
-  STRONG: { label: "STRONG", color: "#94ac7a", pdf: [37, 99, 235] },
-  INCONSISTENT: { label: "INCONSISTENT", color: "#c99a5b", pdf: [245, 158, 11] },
-  "AT RISK": { label: "AT RISK", color: "#cf9159", pdf: [220, 38, 38] },
-  FAIL: { label: "FAIL", color: "#cf6f5c", pdf: [127, 29, 29] },
+  ELITE: { label: "ELITE", color: "#2b2723", pdf: [22, 163, 74] },
+  STRONG: { label: "STRONG", color: "#2b2723", pdf: [37, 99, 235] },
+  INCONSISTENT: { label: "INCONSISTENT", color: "#b5705a", pdf: [245, 158, 11] },
+  "AT RISK": { label: "AT RISK", color: "#b5705a", pdf: [220, 38, 38] },
+  FAIL: { label: "FAIL", color: "#b5705a", pdf: [127, 29, 29] },
 };
 
 export function bandStyle(band: string): BandStyle {
@@ -33,7 +34,9 @@ export function dimensionScoreColor(pct: number): {
   color: string;
   pdf: [number, number, number];
 } {
-  if (pct >= 0.8) return { color: "#79b083", pdf: [22, 163, 74] };
-  if (pct >= 0.5) return { color: "#c99a5b", pdf: [245, 158, 11] };
-  return { color: "#cf6f5c", pdf: [220, 38, 38] };
+  // UI: only genuinely weak scores (< 50%) get the clay accent; the rest read
+  // in plain ink. PDF keeps a green/amber/red tier for print.
+  if (pct >= 0.8) return { color: "#2b2723", pdf: [22, 163, 74] };
+  if (pct >= 0.5) return { color: "#2b2723", pdf: [245, 158, 11] };
+  return { color: "#b5705a", pdf: [220, 38, 38] };
 }

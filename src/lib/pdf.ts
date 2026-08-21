@@ -68,7 +68,7 @@ export function downloadPdf(result: EvaluationResult) {
   const bs = bandStyle(result.band);
 
   // Header
-  text("QC EVALUATOR — FULL ANALYSIS", { size: 9, color: [107, 114, 128] });
+  text("QC EVALUATOR - FULL ANALYSIS", { size: 9, color: [107, 114, 128] });
   text(callLabel, { size: 20, bold: true, gap: 6 });
   text(
     `Score: ${result.total_score} / ${result.max_possible}    Band: ${result.band}`,
@@ -102,7 +102,7 @@ export function downloadPdf(result: EvaluationResult) {
   if (applied.length) {
     text("CAPS APPLIED", { size: 9, bold: true, color: [180, 83, 9] });
     for (const c of applied) {
-      text(`Capped: ${c.condition} — ${c.cap_description}`, {
+      text(`Capped: ${c.condition} - ${c.cap_description}`, {
         size: 10,
         color: [146, 64, 14],
         indent: 4,
