@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { scoreTranscript } from "@/lib/scorer";
 import type { CallType } from "@/lib/types";
@@ -7,8 +8,8 @@ export const maxDuration = 120;
 export const dynamic = "force-dynamic";
 
 /** Runs the LLM scoring and writes the outcome back to the row.
- *  Invoked as a detached promise (NOT awaited) so the HTTP response returns
- *  immediately and scoring survives the client closing the tab. */
+ *  Invoked via `after()` (below) so the HTTP response returns immediately and
+ *  Vercel keeps the serverless function alive until scoring finishes. */
 async function runScoring(id: string, callType: CallType, transcript: string) {
   const admin = getSupabaseAdmin();
   try {
@@ -64,8 +65,10 @@ export async function POST(req: Request) {
     );
   }
 
-  // Fire-and-forget — do NOT await. Scoring continues server-side.
-  void runScoring(data.id, call_type, transcript);
+  // Run scoring AFTER the response is sent. `after()` tells Vercel to keep the
+  // serverless function alive until this finishes — a plain detached promise gets
+  // killed once the response returns, so scoring never completed.
+  after(() => runScoring(data.id, call_type, transcript));
 
   return Response.json({ id: data.id });
 }
