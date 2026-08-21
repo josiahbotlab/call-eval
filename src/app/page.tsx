@@ -11,7 +11,8 @@ export default function Home() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = callType !== null && transcript.trim().length >= 20 && !submitting;
+  const canSubmit =
+    callType !== null && transcript.trim().length >= 20 && !submitting;
 
   async function onSubmit() {
     if (!canSubmit || !callType) return;
@@ -34,17 +35,20 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
-      <p className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-        QC Evaluator
-      </p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">Run an evaluation</h1>
-      <p className="mt-2 text-gray-500">
+      <p className="label">QC Evaluator</p>
+      <h1
+        className="mt-3 text-3xl font-semibold tracking-tight"
+        style={{ color: "var(--fg)" }}
+      >
+        Run an evaluation
+      </h1>
+      <p className="mt-2" style={{ color: "var(--fg-2)" }}>
         Paste a call transcript, pick the call type, and score it against the
         12-dimension rubric.
       </p>
 
-      {/* Call type cards */}
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Call type */}
+      <div className="mt-8 grid grid-cols-1 gap-px sm:grid-cols-2">
         <CardButton
           title="Kick-off call"
           desc="First call. Onboarding, goals, program, next steps."
@@ -62,11 +66,11 @@ export default function Home() {
       {/* Transcript */}
       <div className="mt-8">
         <div className="mb-2 flex items-baseline justify-between">
-          <label htmlFor="transcript" className="text-sm font-medium text-gray-700">
+          <label htmlFor="transcript" className="label">
             Transcript
           </label>
-          <span className="text-xs text-gray-400">
-            {transcript.length.toLocaleString()} characters
+          <span className="mono text-[11px]" style={{ color: "var(--fg-3)" }}>
+            {transcript.length.toLocaleString()} chars
           </span>
         </div>
         <textarea
@@ -74,26 +78,49 @@ export default function Home() {
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
           placeholder="Paste the full call transcript here…"
-          className="h-72 w-full resize-y rounded-xl border border-gray-200 p-4 font-mono text-sm leading-relaxed shadow-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+          spellCheck={false}
+          className="mono h-72 w-full resize-y p-4 text-sm leading-relaxed outline-none transition-colors focus:border-[var(--border-strong)]"
+          style={{
+            background: "var(--panel)",
+            border: "1px solid var(--border)",
+            color: "var(--fg)",
+          }}
         />
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p
+          className="mt-4 pl-3 text-sm leading-relaxed"
+          style={{
+            color: "var(--fg-2)",
+            borderLeft: "1px solid var(--band-fail)",
+          }}
+        >
           {error}
-        </div>
+        </p>
       )}
 
       <div className="mt-6 flex items-center gap-4">
         <button
           onClick={onSubmit}
           disabled={!canSubmit}
-          className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed"
+          style={
+            canSubmit
+              ? { background: "var(--accent)", color: "#0a0a0a" }
+              : {
+                  background: "transparent",
+                  color: "var(--fg-3)",
+                  border: "1px solid var(--border)",
+                }
+          }
         >
-          {submitting ? "Starting…" : "Run evaluation →"}
+          {submitting ? "Starting…" : "Run evaluation"}
         </button>
         {callType === null && (
-          <span className="text-sm text-gray-400">Pick a call type first.</span>
+          <span className="text-sm" style={{ color: "var(--fg-3)" }}>
+            Pick a call type first.
+          </span>
         )}
       </div>
     </main>
@@ -115,16 +142,21 @@ function CardButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border p-5 text-left transition ${
-        selected
-          ? "border-gray-900 bg-gray-900 text-white shadow-sm"
-          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
-      }`}
+      className="p-5 text-left transition-colors"
+      style={{
+        background: selected ? "var(--panel)" : "transparent",
+        border: `1px solid ${
+          selected ? "var(--accent)" : "var(--border)"
+        }`,
+      }}
     >
-      <div className="text-base font-semibold">{title}</div>
       <div
-        className={`mt-1 text-sm ${selected ? "text-gray-300" : "text-gray-500"}`}
+        className="text-base font-medium"
+        style={{ color: selected ? "var(--accent)" : "var(--fg)" }}
       >
+        {title}
+      </div>
+      <div className="mt-1 text-sm" style={{ color: "var(--fg-3)" }}>
         {desc}
       </div>
     </button>

@@ -19,7 +19,7 @@ function getClient(): OpenAI {
 }
 
 function model(): string {
-  return process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4-6";
+  return process.env.OPENROUTER_MODEL || "google/gemini-3.7-flash";
 }
 
 const SYSTEM_PROMPT = `You are a call quality evaluator for a coaching company. You grade coaching calls against a fixed rubric with surgical precision.
@@ -137,15 +137,18 @@ function validate(result: EvaluationResult): EvaluationResult {
 
 export async function scoreTranscript(
   callType: CallType,
-  transcript: string
+  transcript: string,
+  modelOverride?: string
 ): Promise<EvaluationResult> {
   const rubric = callType === "kickoff" ? kickoffRubric : coachingRubric;
   const userPrompt = buildUserPrompt(callType, rubric, transcript);
 
   const completion = await getClient().chat.completions.create({
-    model: model(),
+    model: modelOverride || model(),
     temperature: 0.2,
-    max_tokens: 8000,
+    // 12 dimensions with verbatim evidence quotes can be long; verbose models
+    // (e.g. gemini-2.5-pro, claude) truncate mid-JSON at 8000 and fail to parse.
+    max_tokens: 16000,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userPrompt },

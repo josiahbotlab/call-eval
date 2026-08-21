@@ -8,66 +8,86 @@ export default function DimensionCard({ d }: { d: Dimension }) {
   const [open, setOpen] = useState(false);
 
   const pct = d.disabled || !d.max_score ? 0 : (d.score ?? 0) / d.max_score;
-  const scoreColor = d.disabled ? "text-gray-400" : dimensionScoreColor(pct).textClass;
-  const belowHalf = !d.disabled && pct < 0.5;
+  const scoreColor = d.disabled ? "var(--fg-3)" : dimensionScoreColor(pct).color;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
+    <div style={{ borderTop: "1px solid var(--border)" }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-start gap-4 p-4 text-left"
+        className="flex w-full items-center gap-4 py-3 text-left transition-colors hover:bg-[var(--panel)]"
       >
-        <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full border border-gray-300 text-xs font-semibold text-gray-600">
-          {d.number}
+        {/* index */}
+        <span
+          className="mono w-6 flex-none text-xs"
+          style={{ color: "var(--fg-3)" }}
+        >
+          {String(d.number).padStart(2, "0")}
         </span>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-gray-900">{d.name}</span>
-            {belowHalf && (
-              <span className="text-amber-500" title="Scoring below 50%">
-                ★
-              </span>
-            )}
-          </div>
+        {/* score — monospaced, left-aligned, fixed column */}
+        <span
+          className="mono w-16 flex-none text-sm font-semibold tabular-nums"
+          style={{ color: scoreColor }}
+        >
+          {d.disabled ? "N/A" : `${d.score ?? "-"}/${d.max_score}`}
+        </span>
+
+        {/* name + collapsed rationale */}
+        <span className="min-w-0 flex-1">
+          <span
+            className="block text-sm font-medium"
+            style={{ color: "var(--fg)" }}
+          >
+            {d.name}
+          </span>
           {!open && (
-            <p className="mt-1 line-clamp-2 text-sm text-gray-500">
+            <span
+              className="mt-0.5 line-clamp-1 block text-xs"
+              style={{ color: "var(--fg-3)" }}
+            >
               {d.disabled
                 ? d.disabled_reason || "Disabled for this call."
                 : d.rationale}
-            </p>
+            </span>
           )}
-        </div>
+        </span>
 
-        <div className="flex flex-none items-center gap-3">
-          <span className={`text-sm font-semibold ${scoreColor}`}>
-            {d.disabled ? "N/A" : `${d.score ?? "-"} / ${d.max_score}`}
-          </span>
-          <span className="text-gray-300">{open ? "▾" : "▸"}</span>
-        </div>
+        <span
+          className="mono flex-none text-xs"
+          style={{ color: "var(--fg-3)" }}
+        >
+          {open ? "–" : "+"}
+        </span>
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 px-4 pb-4 pt-3 pl-[60px]">
+        <div className="pb-5 pl-[88px] pr-2">
           {d.disabled && d.disabled_reason && (
-            <p className="mb-3 text-sm italic text-gray-500">
+            <p className="mb-3 text-sm italic" style={{ color: "var(--fg-3)" }}>
               Disabled — {d.disabled_reason}
             </p>
           )}
 
-          <p className="text-sm leading-relaxed text-gray-700">{d.rationale}</p>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: "var(--fg-2)" }}
+          >
+            {d.rationale}
+          </p>
 
           {d.evidence?.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Evidence
-              </p>
+              <div className="label">Evidence</div>
               <div className="mt-2 space-y-2">
                 {d.evidence.map((q, i) => (
                   <p
                     key={i}
-                    className="border-l-2 border-gray-200 pl-3 text-sm italic text-gray-600"
+                    className="pl-3 text-sm italic leading-relaxed"
+                    style={{
+                      color: "var(--fg-2)",
+                      borderLeft: "1px solid var(--border-strong)",
+                    }}
                   >
                     {q}
                   </p>
@@ -77,11 +97,11 @@ export default function DimensionCard({ d }: { d: Dimension }) {
           )}
 
           {d.quick_fix && (
-            <div className="mt-4 rounded-lg bg-gray-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Quick fix
+            <div className="mt-4">
+              <div className="label">Quick fix</div>
+              <p className="mt-1 text-sm" style={{ color: "var(--fg-2)" }}>
+                {d.quick_fix}
               </p>
-              <p className="mt-1 text-sm text-gray-700">{d.quick_fix}</p>
             </div>
           )}
         </div>

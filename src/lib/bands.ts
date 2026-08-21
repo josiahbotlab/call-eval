@@ -2,17 +2,17 @@ import type { OverallBand } from "./types";
 
 export interface BandStyle {
   label: string;
-  textClass: string; // tailwind text color
-  arcColor: string; // hex for the SVG gauge arc
-  pdf: [number, number, number]; // rgb for jsPDF
+  color: string; // hex for dark-mode UI (score number, underline, band label)
+  pdf: [number, number, number]; // rgb for jsPDF (light-background report)
 }
 
+// UI colors are muted, dark-mode-tuned; PDF colors stay saturated for print.
 const STYLES: Record<OverallBand, BandStyle> = {
-  ELITE: { label: "ELITE", textClass: "text-green-600", arcColor: "#16a34a", pdf: [22, 163, 74] },
-  STRONG: { label: "STRONG", textClass: "text-blue-600", arcColor: "#2563eb", pdf: [37, 99, 235] },
-  INCONSISTENT: { label: "INCONSISTENT", textClass: "text-amber-500", arcColor: "#f59e0b", pdf: [245, 158, 11] },
-  "AT RISK": { label: "AT RISK", textClass: "text-red-600", arcColor: "#dc2626", pdf: [220, 38, 38] },
-  FAIL: { label: "FAIL", textClass: "text-red-900", arcColor: "#7f1d1d", pdf: [127, 29, 29] },
+  ELITE: { label: "ELITE", color: "#79b083", pdf: [22, 163, 74] },
+  STRONG: { label: "STRONG", color: "#94ac7a", pdf: [37, 99, 235] },
+  INCONSISTENT: { label: "INCONSISTENT", color: "#c99a5b", pdf: [245, 158, 11] },
+  "AT RISK": { label: "AT RISK", color: "#cf9159", pdf: [220, 38, 38] },
+  FAIL: { label: "FAIL", color: "#cf6f5c", pdf: [127, 29, 29] },
 };
 
 export function bandStyle(band: string): BandStyle {
@@ -30,10 +30,10 @@ export function bandForScore(score: number): OverallBand {
 
 /** Color for a single dimension's score by percentage of its max. */
 export function dimensionScoreColor(pct: number): {
-  textClass: string;
+  color: string;
   pdf: [number, number, number];
 } {
-  if (pct >= 0.8) return { textClass: "text-green-600", pdf: [22, 163, 74] };
-  if (pct >= 0.5) return { textClass: "text-amber-500", pdf: [245, 158, 11] };
-  return { textClass: "text-red-600", pdf: [220, 38, 38] };
+  if (pct >= 0.8) return { color: "#79b083", pdf: [22, 163, 74] };
+  if (pct >= 0.5) return { color: "#c99a5b", pdf: [245, 158, 11] };
+  return { color: "#cf6f5c", pdf: [220, 38, 38] };
 }

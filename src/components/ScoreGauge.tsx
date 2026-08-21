@@ -1,9 +1,7 @@
 import { bandStyle } from "@/lib/bands";
 
-// Semicircle gauge. Track goes left(0) -> right(max) over the top; the colored
-// fill is a dash of the same path, so no arc-flag math for the fill.
-const TRACK = "M 20 110 A 90 90 0 0 1 200 110";
-
+// A large monospaced number over a thin horizontal progress bar in the band
+// color — no semicircle, no dial. Reads like a terminal readout.
 export default function ScoreGauge({
   score,
   max,
@@ -17,45 +15,35 @@ export default function ScoreGauge({
   const bs = bandStyle(band);
 
   return (
-    <div className="flex flex-col items-center">
-      <svg viewBox="0 0 220 120" className="w-56">
-        <path
-          d={TRACK}
-          fill="none"
-          stroke="#e5e7eb"
-          strokeWidth={14}
-          strokeLinecap="round"
-        />
-        <path
-          d={TRACK}
-          fill="none"
-          stroke={bs.arcColor}
-          strokeWidth={14}
-          strokeLinecap="round"
-          pathLength={100}
-          strokeDasharray={`${(frac * 100).toFixed(2)} 100`}
-        />
-        <text
-          x="110"
-          y="96"
-          textAnchor="middle"
-          className="fill-gray-900"
-          fontSize="36"
-          fontWeight={700}
+    <div className="w-full min-w-[180px]">
+      <div className="label">Score</div>
+      <div className="mono mt-2 flex items-baseline gap-1.5">
+        <span
+          className="text-6xl font-semibold leading-none"
+          style={{ color: bs.color }}
         >
           {score}
-        </text>
-        <text
-          x="110"
-          y="114"
-          textAnchor="middle"
-          className="fill-gray-400"
-          fontSize="13"
-        >
+        </span>
+        <span className="text-lg" style={{ color: "var(--fg-3)" }}>
           / {max}
-        </text>
-      </svg>
-      <div className={`mt-1 text-sm font-bold tracking-wide ${bs.textClass}`}>
+        </span>
+      </div>
+
+      {/* thin progress bar */}
+      <div
+        className="mt-3 h-[3px] w-full"
+        style={{ background: "var(--border-strong)" }}
+      >
+        <div
+          className="h-full"
+          style={{ width: `${(frac * 100).toFixed(1)}%`, background: bs.color }}
+        />
+      </div>
+
+      <div
+        className="mono mt-2 text-xs font-semibold tracking-[0.12em]"
+        style={{ color: bs.color }}
+      >
         {bs.label}
       </div>
     </div>

@@ -30,75 +30,105 @@ export default function Report({
   const appliedCaps = (result.global_caps ?? []).filter((c) => c.applied);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-4xl px-6 py-12">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link
+            href="/"
+            className="mono text-xs transition-colors hover:text-[var(--fg)]"
+            style={{ color: "var(--fg-3)" }}
+          >
             ← Back
           </Link>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-            Full Analysis · {callLabel}
-          </p>
+          <p className="label mt-3">Full Analysis · {callLabel}</p>
         </div>
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1.5">
           <button
             onClick={() => downloadPdf(result)}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
+            className="px-3 py-1.5 text-xs font-medium transition-colors hover:text-[var(--fg)] hover:border-[var(--border-strong)]"
+            style={{
+              color: "var(--fg-2)",
+              border: "1px solid var(--border)",
+            }}
           >
-            ↓ Download PDF
+            Download PDF
           </button>
-          <span className="text-xs text-gray-400">
+          <span className="mono text-[11px]" style={{ color: "var(--fg-3)" }}>
             evaluated {timeAgo(createdAt)}
           </span>
         </div>
       </div>
 
-      {/* Overview: one-thing/brief + gauge */}
-      <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-3">
+      {/* Overview: one-thing / brief + score */}
+      <div className="mt-10 grid grid-cols-1 items-start gap-10 md:grid-cols-3">
         <div className="md:col-span-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            The one thing
-          </p>
-          <p className="mt-2 text-2xl font-bold leading-snug text-gray-900">
-            “{result.the_one_thing}”
+          <p className="label">The one thing</p>
+          <p
+            className="mt-2 text-2xl font-semibold leading-snug"
+            style={{ color: "var(--fg)" }}
+          >
+            {result.the_one_thing}
           </p>
           {typeof result.projected_score_with_fix === "number" && (
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mono mt-2 text-xs" style={{ color: "var(--fg-3)" }}>
               Projected {result.projected_score_with_fix} / {result.max_possible}{" "}
               with this fix
             </p>
           )}
-          <p className="mt-4 leading-relaxed text-gray-600">{result.brief}</p>
+          <p
+            className="mt-5 leading-relaxed"
+            style={{ color: "var(--fg-2)" }}
+          >
+            {result.brief}
+          </p>
 
           {result.red_flags?.length > 0 && (
-            <div className="mt-6 space-y-2">
-              {result.red_flags.map((rf, i) => (
-                <div
-                  key={i}
-                  className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-                >
-                  🚩 {rf}
-                </div>
-              ))}
+            <div className="mt-7">
+              <p className="label" style={{ color: "var(--band-fail)" }}>
+                Red flags
+              </p>
+              <div className="mt-3 space-y-2.5">
+                {result.red_flags.map((rf, i) => (
+                  <p
+                    key={i}
+                    className="pl-3 text-sm leading-relaxed"
+                    style={{
+                      color: "var(--fg-2)",
+                      borderLeft: "1px solid var(--band-fail)",
+                    }}
+                  >
+                    {rf}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
 
           {appliedCaps.length > 0 && (
-            <div className="mt-3 space-y-2">
-              {appliedCaps.map((c, i) => (
-                <div
-                  key={i}
-                  className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-                >
-                  Capped: {c.condition} — {c.cap_description}
-                </div>
-              ))}
+            <div className="mt-6">
+              <p className="label" style={{ color: "var(--accent)" }}>
+                Caps applied
+              </p>
+              <div className="mt-3 space-y-2.5">
+                {appliedCaps.map((c, i) => (
+                  <p
+                    key={i}
+                    className="pl-3 text-sm leading-relaxed"
+                    style={{
+                      color: "var(--fg-2)",
+                      borderLeft: "1px solid var(--accent-dim)",
+                    }}
+                  >
+                    {c.condition} — {c.cap_description}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        <div className="md:justify-self-end">
+        <div className="md:justify-self-end md:pt-1">
           <ScoreGauge
             score={result.total_score}
             max={result.max_possible}
@@ -108,11 +138,9 @@ export default function Report({
       </div>
 
       {/* Dimensions */}
-      <div className="mt-10">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          12 dimensions
-        </p>
-        <div className="space-y-3">
+      <div className="mt-12">
+        <p className="label mb-1">12 dimensions</p>
+        <div style={{ borderBottom: "1px solid var(--border)" }}>
           {result.dimensions
             .slice()
             .sort((a, b) => a.number - b.number)

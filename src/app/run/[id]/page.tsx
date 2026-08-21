@@ -46,8 +46,12 @@ export default function RunPage({
   if (notFound) {
     return (
       <Centered>
-        <p className="text-gray-500">Evaluation not found.</p>
-        <Link href="/" className="mt-3 text-sm text-gray-400 hover:text-gray-600">
+        <p style={{ color: "var(--fg-2)" }}>Evaluation not found.</p>
+        <Link
+          href="/"
+          className="mono mt-3 text-xs transition-colors hover:text-[var(--fg)]"
+          style={{ color: "var(--fg-3)" }}
+        >
           ← Back
         </Link>
       </Centered>
@@ -57,15 +61,25 @@ export default function RunPage({
   if (row?.status === "failed") {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
-        <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+        <Link
+          href="/"
+          className="mono text-xs transition-colors hover:text-[var(--fg)]"
+          style={{ color: "var(--fg-3)" }}
+        >
           ← Back
         </Link>
-        <h1 className="mt-4 text-xl font-semibold text-red-700">
+        <p className="label mt-6" style={{ color: "var(--band-fail)" }}>
           Evaluation failed
-        </h1>
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        </p>
+        <p
+          className="mt-3 pl-3 text-sm leading-relaxed"
+          style={{
+            color: "var(--fg-2)",
+            borderLeft: "1px solid var(--band-fail)",
+          }}
+        >
           {row.error || "The scoring run failed without an error message."}
-        </div>
+        </p>
       </main>
     );
   }
@@ -74,12 +88,16 @@ export default function RunPage({
     return <Report result={row.result} createdAt={row.created_at} />;
   }
 
-  // pending / processing / initial load
+  // pending / processing / initial load — just the word, subtly pulsing.
   return (
     <Centered>
-      <Spinner />
-      <p className="mt-4 font-medium text-gray-700">Evaluating transcript…</p>
-      <p className="mt-1 text-sm text-gray-400">
+      <p
+        className="pulse text-2xl font-semibold tracking-tight"
+        style={{ color: "var(--fg)" }}
+      >
+        Scoring…
+      </p>
+      <p className="mono mt-3 text-xs" style={{ color: "var(--fg-3)" }}>
         You can close this tab and come back.
       </p>
     </Centered>
@@ -91,11 +109,5 @@ function Centered({ children }: { children: React.ReactNode }) {
     <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       {children}
     </main>
-  );
-}
-
-function Spinner() {
-  return (
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-gray-800" />
   );
 }
