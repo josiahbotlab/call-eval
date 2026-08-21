@@ -46,32 +46,33 @@ export default function Report({
           borderBottom: "1px solid var(--border-strong)",
         }}
       >
-        <div className="mx-auto flex h-10 max-w-3xl items-center gap-3 px-6">
+        <div className="mx-auto flex h-14 max-w-3xl items-center gap-4 px-6">
           <Link
             href="/"
-            className="text-[11px] font-semibold hover:text-[var(--ink)]"
-            style={{ color: "var(--ink-3)" }}
+            className="strip-link text-base font-semibold"
           >
             QC Evaluator
           </Link>
           <span
-            className="label"
+            className="text-[12px] font-semibold uppercase tracking-[0.08em]"
             style={{
-              border: "1px solid var(--border)",
+              color: "var(--ink-2)",
+              background: "var(--field)",
+              border: "1px solid var(--border-strong)",
               borderRadius: "var(--radius)",
-              padding: "1px 5px",
+              padding: "3px 9px",
             }}
           >
             {callTag}
           </span>
           <span
-            className="mono text-[13px] font-semibold tabular-nums"
+            className="mono text-[22px] font-semibold tabular-nums leading-none"
             style={{ color: "var(--ink)" }}
           >
             {result.total_score} / {result.max_possible}
           </span>
           <span
-            className="text-[11px] font-semibold tracking-[0.06em]"
+            className="text-[15px] font-semibold tracking-[0.04em]"
             style={{ color: bs.color }}
           >
             {bs.label}
@@ -85,8 +86,7 @@ export default function Report({
           </span>
           <button
             onClick={() => downloadPdf(result)}
-            className="text-[11px] font-medium hover:text-[var(--ink)]"
-            style={{ color: "var(--accent)" }}
+            className="strip-pdf px-3.5 py-2 text-[13px] font-semibold"
           >
             Download PDF
           </button>

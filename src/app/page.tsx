@@ -80,21 +80,7 @@ export default function Home() {
         <button
           onClick={onSubmit}
           disabled={!canSubmit}
-          className="ml-auto px-4 py-1.5 text-[13px] font-semibold disabled:cursor-not-allowed"
-          style={
-            canSubmit
-              ? {
-                  background: "var(--accent)",
-                  color: "var(--paper)",
-                  borderRadius: "var(--radius)",
-                }
-              : {
-                  background: "transparent",
-                  color: "var(--ink-3)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius)",
-                }
-          }
+          className="btn-primary ml-auto px-8 py-3.5 text-[17px] font-semibold"
         >
           {submitting ? "Starting..." : "Run evaluation"}
         </button>
@@ -116,12 +102,8 @@ function Segmented({
       <button
         type="button"
         onClick={() => onSelect(value)}
-        className="px-3 py-1.5 text-xs font-medium"
-        style={{
-          background: selected ? "var(--accent)" : "transparent",
-          color: selected ? "var(--paper)" : "var(--ink-2)",
-          borderLeft: first ? "none" : "1px solid var(--border)",
-        }}
+        className={`${selected ? "seg-on" : "seg"} px-7 py-3 text-[17px] font-medium`}
+        style={{ borderLeft: first ? "none" : "1px solid var(--border)" }}
       >
         {label}
       </button>

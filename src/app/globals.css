@@ -18,6 +18,8 @@
 
   --accent: #b5705a; /* muted clay / terracotta - the one accent */
   --accent-dim: #cf9c8c;
+  --accent-hover: #9e5f4b; /* darker clay for button hover */
+  --field-hover: #ece5d6; /* slightly darker paper for ghost hover */
 
   --radius: 2px;
 
@@ -65,6 +67,61 @@ textarea,
 input,
 button {
   font-family: inherit;
+}
+
+/* Interactive buttons - clearly clickable, with hover states. */
+.btn-primary {
+  background: var(--accent);
+  color: var(--paper);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+.btn-primary:disabled {
+  background: transparent;
+  color: var(--ink-3);
+  border: 1px solid var(--border);
+  cursor: not-allowed;
+}
+
+/* Segmented toggle segments. */
+.seg {
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.seg:hover {
+  background: var(--field-hover);
+  color: var(--ink);
+}
+.seg-on {
+  background: var(--accent);
+  color: var(--paper);
+  cursor: pointer;
+}
+.seg-on:hover {
+  background: var(--accent-hover);
+}
+
+/* Sticky-strip interactive elements. */
+.strip-link {
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.strip-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.strip-pdf {
+  background: var(--accent);
+  color: var(--paper);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.strip-pdf:hover {
+  background: var(--accent-hover);
 }
 
 /* Scoring loading state: gentle fade-in for the cycling status text, and a
