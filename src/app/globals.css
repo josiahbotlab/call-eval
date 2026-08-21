@@ -66,3 +66,36 @@ input,
 button {
   font-family: inherit;
 }
+
+/* Scoring loading state: gentle fade-in for the cycling status text, and a
+   thin clay line that fills left to right over ~45s. No spinner, no bounce. */
+@keyframes cb-fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cb-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.status-fade {
+  animation: cb-fadein 0.5s ease;
+}
+.progress-track {
+  height: 2px;
+  width: 240px;
+  background: var(--border-strong);
+}
+.progress-track > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  animation: cb-fill 45s linear forwards;
+}

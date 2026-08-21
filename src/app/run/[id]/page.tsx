@@ -5,6 +5,14 @@ import Link from "next/link";
 import type { EvaluationRow } from "@/lib/types";
 import Report from "@/components/Report";
 
+const STATUS_MESSAGES = [
+  "Reading transcript...",
+  "Scoring dimensions...",
+  "Analyzing evidence...",
+  "Building report...",
+  "Finalizing scores...",
+];
+
 export default function RunPage({
   params,
 }: {
@@ -13,6 +21,7 @@ export default function RunPage({
   const { id } = use(params);
   const [row, setRow] = useState<EvaluationRow | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [msgIndex, setMsgIndex] = useState(0);
   const stopped = useRef(false);
 
   useEffect(() => {
@@ -42,6 +51,21 @@ export default function RunPage({
       clearTimeout(timer);
     };
   }, [id]);
+
+  const loading =
+    !notFound &&
+    row?.status !== "failed" &&
+    !(row?.status === "completed" && row.result);
+
+  // Cycle the status text every 3.5s while scoring is in progress.
+  useEffect(() => {
+    if (!loading) return;
+    const t = setInterval(
+      () => setMsgIndex((i) => (i + 1) % STATUS_MESSAGES.length),
+      3500
+    );
+    return () => clearInterval(t);
+  }, [loading]);
 
   if (notFound) {
     return (
@@ -88,16 +112,20 @@ export default function RunPage({
     return <Report result={row.result} createdAt={row.created_at} />;
   }
 
-  // pending / processing / initial load - plain text, no spinner, no animation.
+  // pending / processing / initial load - cycling status text + thin fill line.
   return (
     <Centered>
       <p
-        className="text-base font-semibold tracking-tight"
+        key={msgIndex}
+        className="status-fade text-base font-semibold tracking-tight"
         style={{ color: "var(--ink)" }}
       >
-        Scoring...
+        {STATUS_MESSAGES[msgIndex]}
       </p>
-      <p className="mt-2 text-xs" style={{ color: "var(--ink-3)" }}>
+      <div className="progress-track mt-4">
+        <span />
+      </div>
+      <p className="mt-4 text-xs" style={{ color: "var(--ink-3)" }}>
         You can close this tab and come back.
       </p>
     </Centered>

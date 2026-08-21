@@ -34,63 +34,28 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-14">
-      <p className="label">QC Evaluator</p>
+    <main className="mx-auto flex h-screen max-w-4xl flex-col px-6 py-6">
       <h1
-        className="mt-2 text-xl font-semibold tracking-tight"
+        className="text-sm font-semibold tracking-tight"
         style={{ color: "var(--ink)" }}
       >
-        Run an evaluation
+        QC Evaluator
       </h1>
-      <p className="mt-1.5 text-[13px]" style={{ color: "var(--ink-2)" }}>
-        Paste a call transcript, pick the call type, and score it against the
-        12-dimension rubric.
-      </p>
 
-      {/* Call type */}
-      <div className="mt-7">
-        <p className="label mb-2">Call type</p>
-        <div className="flex flex-col gap-px sm:flex-row sm:gap-2">
-          <CardButton
-            title="Kick-off call"
-            desc="First call. Onboarding, goals, program, next steps."
-            selected={callType === "kickoff"}
-            onClick={() => setCallType("kickoff")}
-          />
-          <CardButton
-            title="Coaching call"
-            desc="Ongoing session. Check-in, coaching, accountability."
-            selected={callType === "coaching"}
-            onClick={() => setCallType("coaching")}
-          />
-        </div>
-      </div>
-
-      {/* Transcript */}
-      <div className="mt-7">
-        <div className="mb-1.5 flex items-baseline justify-between">
-          <label htmlFor="transcript" className="label">
-            Transcript
-          </label>
-          <span className="mono text-[11px]" style={{ color: "var(--ink-3)" }}>
-            {transcript.length.toLocaleString()} chars
-          </span>
-        </div>
-        <textarea
-          id="transcript"
-          value={transcript}
-          onChange={(e) => setTranscript(e.target.value)}
-          placeholder="Paste the full call transcript here..."
-          spellCheck={false}
-          className="mono h-72 w-full resize-y p-3 text-xs leading-relaxed outline-none focus:border-[var(--border-strong)]"
-          style={{
-            background: "var(--field)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-            color: "var(--ink)",
-          }}
-        />
-      </div>
+      {/* Primary element: the transcript, filling the page like a code editor */}
+      <textarea
+        value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+        placeholder="Paste the full call transcript here..."
+        spellCheck={false}
+        className="mono mt-3 w-full flex-1 resize-none p-4 text-xs leading-relaxed outline-none focus:border-[var(--border-strong)]"
+        style={{
+          background: "var(--field)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          color: "var(--ink)",
+        }}
+      />
 
       {error && (
         <p
@@ -104,11 +69,18 @@ export default function Home() {
         </p>
       )}
 
-      <div className="mt-5 flex items-center gap-3">
+      {/* Secondary controls, all on one line */}
+      <div className="mt-3 flex items-center gap-4">
+        <Segmented callType={callType} onSelect={setCallType} />
+
+        <span className="mono text-[11px]" style={{ color: "var(--ink-3)" }}>
+          {transcript.length.toLocaleString()} chars
+        </span>
+
         <button
           onClick={onSubmit}
           disabled={!canSubmit}
-          className="px-4 py-2 text-[13px] font-semibold disabled:cursor-not-allowed"
+          className="ml-auto px-4 py-1.5 text-[13px] font-semibold disabled:cursor-not-allowed"
           style={
             canSubmit
               ? {
@@ -126,47 +98,46 @@ export default function Home() {
         >
           {submitting ? "Starting..." : "Run evaluation"}
         </button>
-        {callType === null && (
-          <span className="text-xs" style={{ color: "var(--ink-3)" }}>
-            Pick a call type first.
-          </span>
-        )}
       </div>
     </main>
   );
 }
 
-function CardButton({
-  title,
-  desc,
-  selected,
-  onClick,
+function Segmented({
+  callType,
+  onSelect,
 }: {
-  title: string;
-  desc: string;
-  selected: boolean;
-  onClick: () => void;
+  callType: CallType | null;
+  onSelect: (c: CallType) => void;
 }) {
+  const opt = (value: CallType, label: string, first: boolean) => {
+    const selected = callType === value;
+    return (
+      <button
+        type="button"
+        onClick={() => onSelect(value)}
+        className="px-3 py-1.5 text-xs font-medium"
+        style={{
+          background: selected ? "var(--accent)" : "transparent",
+          color: selected ? "var(--paper)" : "var(--ink-2)",
+          borderLeft: first ? "none" : "1px solid var(--border)",
+        }}
+      >
+        {label}
+      </button>
+    );
+  };
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex-1 p-3 text-left"
+    <div
+      className="inline-flex overflow-hidden"
       style={{
-        background: selected ? "var(--field)" : "transparent",
-        border: `1px solid ${selected ? "var(--accent)" : "var(--border)"}`,
+        border: "1px solid var(--border)",
         borderRadius: "var(--radius)",
       }}
     >
-      <div
-        className="text-[13px] font-semibold"
-        style={{ color: selected ? "var(--accent)" : "var(--ink)" }}
-      >
-        {title}
-      </div>
-      <div className="mt-0.5 text-xs" style={{ color: "var(--ink-3)" }}>
-        {desc}
-      </div>
-    </button>
+      {opt("kickoff", "Kick-off", true)}
+      {opt("coaching", "Coaching", false)}
+    </div>
   );
 }
