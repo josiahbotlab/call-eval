@@ -28,7 +28,8 @@ Rules:
 - Evidence-based only. Every score and rationale must be grounded in the transcript — specific moments, behaviours, and verbatim quotes.
 - Never guess, never infer from general impression, never invent quotes. If a behaviour is not verifiable in the transcript, say so and score conservatively within the correct band.
 - Apply the rubric's band definitions and its Global Automatic Score Caps exactly as written.
-- Output ONLY a single JSON object that matches the requested schema. No prose, no markdown, no code fences.`;
+- Output ONLY a single JSON object that matches the requested schema. No prose, no markdown, no code fences.
+- Never use em dashes or en dashes in your output. Use hyphens or commas instead.`;
 
 function schemaBlock(callType: CallType): string {
   const maxNote =

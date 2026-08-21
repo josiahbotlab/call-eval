@@ -4,6 +4,7 @@ import { bandStyle, dimensionScoreColor } from "./bands";
 
 // ── Layout constants (millimetres; letter page is 215.9 x 279.4 mm) ───────────
 const MARGIN = 25; // generous left/right/top/bottom margin
+const CONT_TOP = 8; // extra top margin on continuation pages
 const SECTION_GAP = 6; // between major sections
 const QUOTE_GAP = 5; // between evidence quotes
 const PARA_GAP = 2.5; // after a normal paragraph
@@ -44,16 +45,38 @@ export function buildPdf(result: EvaluationResult): jsPDF {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const contentW = pageW - MARGIN * 2;
-  const pageUsable = pageH - MARGIN * 2;
+  // Usable height is measured from the continuation-page top so a block that
+  // "fits a page" fits on ANY page (prevents an infinite page-add loop).
+  const usable = pageH - 2 * MARGIN - CONT_TOP;
   const bottom = pageH - MARGIN;
   let y = MARGIN;
 
-  // Add a page if `needed` mm won't fit in the remaining space.
+  // Add a page if `needed` mm won't fit in the remaining space. Continuation
+  // pages start CONT_TOP below the margin so text doesn't hug the top edge.
   const ensure = (needed: number) => {
     if (y + needed > bottom) {
       doc.addPage();
-      y = MARGIN;
+      y = MARGIN + CONT_TOP;
     }
+  };
+
+  // Measure a wrapped text block (line count + total height) without drawing.
+  const measure = (str: string, size: number, indent = 0, bold = false) => {
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(size);
+    const lines = doc.splitTextToSize(sanitize(str), contentW - indent) as string[];
+    return { lines, height: lines.length * lh(size) };
+  };
+
+  // Height of a dimension header, wrapped to leave room for its score.
+  const headerHeight = (label: string, scoreStr: string): number => {
+    const size = 10.5;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(size);
+    const scoreW = doc.getTextWidth(sanitize(scoreStr));
+    const titleMaxW = Math.max(20, contentW - scoreW - 4);
+    const lines = doc.splitTextToSize(sanitize(label), titleMaxW) as string[];
+    return lines.length * lh(size);
   };
 
   // Draw one already-wrapped line; baseline sits near the bottom of the line box.
@@ -72,6 +95,7 @@ export function buildPdf(result: EvaluationResult): jsPDF {
       color?: RGB;
       gap?: number;
       indent?: number;
+      noBreak?: boolean;
     } = {}
   ) => {
     const size = opts.size ?? 10;
@@ -83,10 +107,11 @@ export function buildPdf(result: EvaluationResult): jsPDF {
       sanitize(str),
       contentW - indent
     ) as string[];
-    // Page-break BEFORE the block if the whole thing fits on a fresh page but
-    // not in the space that's left. Oversized blocks fall back to per-line breaks.
+    // Page-break BEFORE the whole block if it fits on a fresh page but not in the
+    // space that's left — so a block is never split across pages. `noBreak` skips
+    // this (used when the caller has already reserved space for the block).
     const block = lines.length * lh(size);
-    if (block <= pageUsable) ensure(block);
+    if (!opts.noBreak && block <= usable) ensure(block);
     for (const ln of lines) writeLine(ln, MARGIN + indent, size);
     if (opts.gap) y += opts.gap;
   };
@@ -112,7 +137,7 @@ export function buildPdf(result: EvaluationResult): jsPDF {
     const titleMaxW = Math.max(20, contentW - scoreW - 4);
     const lines = doc.splitTextToSize(sanitize(label), titleMaxW) as string[];
     const h = lh(size);
-    if (lines.length * h <= pageUsable) ensure(lines.length * h);
+    if (lines.length * h <= usable) ensure(lines.length * h);
     let first = true;
     for (const ln of lines) {
       ensure(h);
@@ -182,14 +207,25 @@ export function buildPdf(result: EvaluationResult): jsPDF {
   text("DIMENSIONS", { size: 12, bold: true, gap: 3 });
   const dims = result.dimensions.slice().sort((a, b) => a.number - b.number);
   for (const d of dims) {
-    // Keep the header with at least its first couple of rationale lines.
-    ensure(lh(10.5) + lh(9) * 2);
-
     const scoreStr = d.disabled
       ? "N/A (disabled)"
       : `${d.score ?? "-"} / ${d.max_score}`;
     const pct = d.disabled || !d.max_score ? 0 : (d.score ?? 0) / d.max_score;
     const color: RGB = d.disabled ? GRAY : (dimensionScoreColor(pct).pdf as RGB);
+
+    // Keep the header together with the first 3 rationale lines (or the whole
+    // rationale if header+rationale fit on one page) so a header never orphans
+    // at the bottom of a page and the rationale block isn't split off from it.
+    const headerH = headerHeight(`${d.number}. ${d.name}`, scoreStr);
+    const rat = measure(d.rationale, 9);
+    const disabledH =
+      d.disabled && d.disabled_reason
+        ? measure(`Disabled: ${d.disabled_reason}`, 9).height + 1.5
+        : 0;
+    const first3 = Math.min(3, rat.lines.length) * lh(9);
+    const together = headerH + 1.5 + disabledH + rat.height;
+    const ratKeep = together <= usable ? rat.height : first3;
+    ensure(headerH + 1.5 + disabledH + ratKeep);
 
     dimensionHeader(`${d.number}. ${d.name}`, scoreStr, color);
     y += 1.5;
@@ -197,7 +233,9 @@ export function buildPdf(result: EvaluationResult): jsPDF {
     if (d.disabled && d.disabled_reason) {
       text(`Disabled: ${d.disabled_reason}`, { size: 9, color: GRAY, gap: 1.5 });
     }
-    text(d.rationale, { size: 9, gap: PARA_GAP });
+    // noBreak: space is reserved above; render from here so the rationale flows
+    // directly under the header instead of page-breaking away from it.
+    text(d.rationale, { size: 9, gap: PARA_GAP, noBreak: true });
 
     if (d.evidence?.length) {
       text("EVIDENCE", { size: 8, bold: true, color: GRAY, gap: 2 });
