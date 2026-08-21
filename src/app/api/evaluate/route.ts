@@ -51,19 +51,31 @@ async function runScoring(id: string, callType: CallType, transcript: string) {
       scoreTranscript(callType, transcript),
       llmTimeoutMs()
     );
-    await admin
+    // supabase-js RESOLVES (does not throw) on a DB error, so the returned
+    // `error` MUST be checked — otherwise a failed write silently leaves the
+    // row stuck on "processing". Throw so the catch below records a failure.
+    const { error: updateError } = await admin
       .from("evaluations")
       .update({ status: "completed", result, error: null })
       .eq("id", id);
+    if (updateError) {
+      throw new Error(`Failed to save completed result: ${updateError.message}`);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[evaluate] scoring failed for ${id}:`, message);
     try {
       const admin = getSupabaseAdmin();
-      await admin
+      const { error: failError } = await admin
         .from("evaluations")
         .update({ status: "failed", error: message })
         .eq("id", id);
+      if (failError) {
+        console.error(
+          `[evaluate] could not write failure status for ${id}:`,
+          failError.message
+        );
+      }
     } catch (dbErr) {
       console.error(
         `[evaluate] could not write failure status for ${id}:`,
